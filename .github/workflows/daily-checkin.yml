@@ -1,0 +1,27 @@
+name: 每日值班打卡
+
+on:
+  schedule:
+    - cron: '7 1 * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/daily-checkin.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  checkin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 写一行打卡记录
+        run: echo "$(date -u '+%Y-%m-%d %H:%M UTC') 值班机器人自动打卡" >> checkins.log
+      - name: 提交回仓库
+        run: |
+          git config user.name "muse-actions-bot"
+          git config user.email "actions@github.com"
+          git add checkins.log
+          git commit -m "每日打卡 $(date -u '+%Y-%m-%d')"
+          git push
